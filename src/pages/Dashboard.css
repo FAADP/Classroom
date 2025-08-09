@@ -5,7 +5,6 @@
   background-color: #f9f9f9;
   border-radius: 8px;
 }
-
 .form-container, .list-container {
   background-color: white;
   padding: 20px;
@@ -13,7 +12,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
-
 .form-container h3, .list-container h3 {
   margin-top: 0;
   border-bottom: 2px solid #eee;
@@ -21,11 +19,11 @@
   margin-bottom: 20px;
 }
 
+/* Create Group Form Styles */
 .form-container form {
   display: flex;
   gap: 10px;
 }
-
 .form-container input {
   flex-grow: 1;
   padding: 10px;
@@ -33,7 +31,6 @@
   border-radius: 4px;
   font-size: 16px;
 }
-
 .form-container button {
   padding: 10px 20px;
   background-color: #28a745;
@@ -43,46 +40,77 @@
   cursor: pointer;
   font-size: 16px;
 }
-
 .form-container button:hover {
   background-color: #218838;
 }
 
-.list-container ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.list-container li {
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  font-size: 18px;
-}
-
-.list-container li:last-child {
-  border-bottom: none;
-}
-
-/* Add Student فارم کے لیے نیا اسٹائل */
+/* Add Student Form Styles */
 .add-student-form {
   display: flex;
-  flex-direction: column; /* خانوں کو عمودی طور پر دکھائے گا */
-  gap: 15px; /* ہر خانے کے درمیان فاصلہ */
+  flex-direction: column;
+  gap: 15px;
 }
-
 .add-student-form input, .add-student-form select, .add-student-form button {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 16px;
 }
-
 .add-student-form button {
   background-color: #007bff;
   color: white;
   cursor: pointer;
 }
-
 .add-student-form button:hover {
   background-color: #0056b3;
+}
+.success-message {
+  padding: 10px;
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+  margin-top: 15px;
+  text-align: center;
+}
+
+/* List/Table Styles */
+.list-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+.list-container li {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  font-size: 18px;
+}
+.list-container li:last-child {
+  border-bottom: none;
+}
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.students-table th, .students-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+.students-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+.students-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.delete-btn:hover {
+  background-color: #c82333;
 }

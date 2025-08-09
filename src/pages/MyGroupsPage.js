@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import './Dashboard.css'; // درست امپورٹ لائن
+import './Dashboard.css';
 
 function MyGroupsPage() { 
   const [loading, setLoading] = useState(true);
@@ -49,6 +49,19 @@ function MyGroupsPage() {
       setGroupName('');
     }
   };
+  
+  // گروپ ڈیلیٹ کرنے کا نیا فنکشن
+  const handleDeleteGroup = async (groupId) => {
+    if (window.confirm("Are you sure you want to delete this group?")) {
+      const { error } = await supabase.from('groups').delete().eq('id', groupId);
+      if (error) {
+        alert("Error deleting group: " + error.message);
+      } else {
+        // UI سے گروپ کو فوراً ہٹائیں
+        setGroups(groups.filter(g => g.id !== groupId));
+      }
+    }
+  };
 
   if (loading) {
     return <div>Loading your groups...</div>;
@@ -74,11 +87,24 @@ function MyGroupsPage() {
         {groups.length === 0 ? (
           <p>You have not created any groups yet.</p>
         ) : (
-          <ul>
-            {groups.map((group) => (
-              <li key={group.id}>{group.name}</li>
-            ))}
-          </ul>
+          <table className="students-table">
+            <thead>
+              <tr>
+                <th>Group Name</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groups.map((group) => (
+                <tr key={group.id}>
+                  <td>{group.name}</td>
+                  <td>
+                    <button onClick={() => handleDeleteGroup(group.id)} className="delete-btn">Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
