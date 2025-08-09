@@ -1,0 +1,88 @@
+.dashboard-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.form-container, .list-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.form-container h3, .list-container h3 {
+  margin-top: 0;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.form-container form {
+  display: flex;
+  gap: 10px;
+}
+
+.form-container input {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.form-container button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.form-container button:hover {
+  background-color: #218838;
+}
+
+.list-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.list-container li {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  font-size: 18px;
+}
+
+.list-container li:last-child {
+  border-bottom: none;
+}
+
+/* Add Student فارم کے لیے نیا اسٹائل */
+.add-student-form {
+  display: flex;
+  flex-direction: column; /* خانوں کو عمودی طور پر دکھائے گا */
+  gap: 15px; /* ہر خانے کے درمیان فاصلہ */
+}
+
+.add-student-form input, .add-student-form select, .add-student-form button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.add-student-form button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.add-student-form button:hover {
+  background-color: #0056b3;
+}
