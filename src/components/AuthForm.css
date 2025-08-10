@@ -5,7 +5,10 @@
   justify-content: center;
   align-items: center;
   perspective: 1000px;
-  background-color: #f0f2f5;
+  /* --- نیا خوبصورت پس منظر --- */
+  background-image: url('https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+  background-size: cover;
+  background-position: center;
 }
 
 .cube {
@@ -16,7 +19,6 @@
   animation: rotateCube 25s infinite linear;
 }
 
-/* --- نئی تبدیلی یہاں ہے --- */
 /* جب ماؤس کیوب پر ہو، تو گھومنا بند کر دو */
 .scene:hover .cube {
   animation-play-state: paused;
@@ -38,7 +40,7 @@
 
 .front {
   transform: translateZ(200px);
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.9); /* تھوڑا شفاف (transparent) تاکہ پس منظر دکھے */
 }
 
 .back {
@@ -72,6 +74,8 @@
   height: 100%;
   box-sizing: border-box;
 }
+
+/* ... باقی تمام فارم کے اسٹائلز پہلے جیسے ہی رہیں گے ... */
 .auth-form h2 {
   text-align: center;
   margin-bottom: 24px;
@@ -96,4 +100,12 @@
   color: white;
   border: none;
   border-radius: 4px;
+}
+
+/* موبائل کے لیے */
+@media (max-width: 600px) {
+  .cube {
+    transform: scale(0.7);
+    /* animation: none; کو ہٹا دیا گیا ہے تاکہ کیوب گھومتا رہے */
+  }
 }
