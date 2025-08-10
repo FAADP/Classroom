@@ -1,45 +1,94 @@
-.auth-container {
+.scene {
+  width: 100vw;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  perspective: 1000px;
   background-color: #f0f2f5;
+}
+
+.cube {
+  width: 400px;
+  height: 450px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: rotateCube 25s infinite linear;
+}
+
+/* --- نئی تبدیلی یہاں ہے --- */
+/* جب ماؤس کیوب پر ہو، تو گھومنا بند کر دو */
+.scene:hover .cube {
+  animation-play-state: paused;
+}
+
+@keyframes rotateCube {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+.face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #600000;
+  background-size: cover;
+  background-position: center;
+}
+
+.front {
+  transform: translateZ(200px);
+  background-color: white;
+}
+
+.back {
+  transform: rotateY(180deg) translateZ(200px);
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/3/32/Flag_of_Pakistan.svg');
+}
+
+.right {
+  transform: rotateY(90deg) translateZ(200px);
+  background-image: url('https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+}
+
+.left {
+  transform: rotateY(-90deg) translateZ(200px);
+  background-image: url('https://images.pexels.com/photos/41949/earth-earth-at-night-night-lights-41949.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+}
+
+.top {
+  transform: rotateX(90deg) translateZ(225px);
+  height: 400px;
+}
+
+.bottom {
+  transform: rotateX(-90deg) translateZ(225px);
+  height: 400px;
 }
 
 .auth-form {
   padding: 40px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  height: 100%;
+  box-sizing: border-box;
 }
-
 .auth-form h2 {
   text-align: center;
   margin-bottom: 24px;
-  color: #333;
 }
-
 .input-group {
   margin-bottom: 20px;
 }
-
 .input-group label {
   display: block;
   margin-bottom: 8px;
-  color: #555;
-  font-weight: bold;
 }
-
 .input-group input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 16px;
 }
-
 .auth-button {
   width: 100%;
   padding: 12px;
@@ -47,11 +96,4 @@
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.auth-button:hover {
-  background-color: #0056b3;
 }
