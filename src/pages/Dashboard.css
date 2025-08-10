@@ -131,3 +131,17 @@
     grid-template-columns: 1fr; /* موبائل پر چارٹس ایک کے نیچے ایک آئیں گے */
   }
 }
+/* Report Options Styles */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: normal;
+}

@@ -6,7 +6,7 @@ function TeacherSidebar({ onLogout }) {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <h3>درس گاہ</h3>
+        <h3>Learning Hub</h3>
       </div>
       <ul className="sidebar-nav">
         <NavLink to="/teacher-dashboard" className="nav-link"><li className="nav-item">Dashboard</li></NavLink>
