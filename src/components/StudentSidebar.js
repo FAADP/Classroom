@@ -10,11 +10,9 @@ function StudentSidebar({ onLogout }) {
       </div>
       <ul className="sidebar-nav">
         <NavLink to="/student-dashboard" className="nav-link"><li className="nav-item">My Dashboard</li></NavLink>
-        <li className="nav-item disabled">My Assignments</li>
-        <li className="nav-item disabled">My Grades</li>
-        <li className="nav-item disabled">Profile Settings</li>
-
-        {/* لاگ آؤٹ کو یہاں بھی ایک لسٹ آئٹم بنا دیا گیا ہے */}
+        <NavLink to="/student-assignments" className="nav-link"><li className="nav-item">My Assignments</li></NavLink>
+        <NavLink to="/student-grades" className="nav-link"><li className="nav-item">My Grades</li></NavLink>
+        <NavLink to="/student-profile-settings" className="nav-link"><li className="nav-item">Profile Settings</li></NavLink>
         <li className="nav-item nav-item-logout" onClick={onLogout}>
           Logout
         </li>
