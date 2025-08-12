@@ -18,6 +18,8 @@ function StudentAssignmentsPage() {
       setUser(user);
 
       if (user) {
+        // --- کلیدی تبدیلی یہاں ہے ---
+        // 1. طالب علم کی پروفائل سے اس کا گروپ ID حاصل کریں
         const { data: profileData } = await supabase
           .from('profiles')
           .select('group_id')
@@ -25,22 +27,34 @@ function StudentAssignmentsPage() {
           .single();
 
         if (profileData && profileData.group_id) {
-          const { data: assignmentsData } = await supabase
-            .from('assignments')
-            .select('*')
+          // 2. 'assigned_tasks' ٹیبل سے وہ تمام اسائنمنٹس حاصل کریں جو اس گروپ کو بھیجی گئی ہیں
+          const { data: assignedTasks, error } = await supabase
+            .from('assigned_tasks')
+            .select(`
+              assignments (
+                id, name, details, link_url
+              )
+            `)
             .eq('group_id', profileData.group_id);
-          
-          setAssignments(assignmentsData || []);
 
-          const { data: submissionsData } = await supabase
+          if (error) {
+            console.error('Error fetching assigned tasks:', error);
+          } else {
+            // 3. اسائنمنٹس کی لسٹ کو صاف کریں
+            const studentAssignments = assignedTasks.map(task => task.assignments);
+            setAssignments(studentAssignments);
+          }
+        }
+        
+        // 4. طالب علم کی جمع شدہ اسائنمنٹس حاصل کریں (یہ پہلے جیسا ہی ہے)
+        const { data: submissionsData } = await supabase
             .from('submissions')
             .select('assignment_id')
             .eq('student_id', user.id);
           
-          if (submissionsData) {
+        if (submissionsData) {
             const ids = new Set(submissionsData.map(s => s.assignment_id));
             setSubmittedIds(ids);
-          }
         }
       }
       setLoading(false);
@@ -49,23 +63,16 @@ function StudentAssignmentsPage() {
   }, []);
 
   const handleSubmission = async (assignmentId) => {
+    // ... یہ فنکشن پہلے جیسا ہی رہے گا ...
     if (!submissionContent.trim()) {
-      alert("Please enter your submission content.");
+      alert("Please enter submission.");
       return;
     }
-
-    const { error } = await supabase
-      .from('submissions')
-      .insert({
-        assignment_id: assignmentId,
-        student_id: user.id,
-        submission_content: submissionContent
-      });
-
+    const { error } = await supabase.from('submissions').insert({ assignment_id: assignmentId, student_id: user.id, submission_content: submissionContent });
     if (error) {
-      setMessage('Error submitting assignment: ' + error.message);
+      setMessage('Error: ' + error.message);
     } else {
-      setMessage('Assignment submitted successfully!');
+      setMessage('Submitted successfully!');
       setSubmittedIds(new Set([...submittedIds, assignmentId]));
       setSubmittingId(null);
       setSubmissionContent('');
@@ -90,32 +97,18 @@ function StudentAssignmentsPage() {
                 <div key={assignment.id} className="assignment-card">
                   <h4>{assignment.name}</h4>
                   <p>{assignment.details}</p>
-                  {assignment.link_url && (
-                    <a href={assignment.link_url} target="_blank" rel="noopener noreferrer">
-                      View Resource
-                    </a>
-                  )}
+                  {assignment.link_url && ( <a href={assignment.link_url} target="_blank" rel="noopener noreferrer">View Resource</a> )}
                   <div className="submission-section">
                     {submittedIds.has(assignment.id) ? (
                       <p className="submitted-message">✔️ Submitted</p>
                     ) : submittingId === assignment.id ? (
                       <div>
-                        <textarea 
-                          placeholder="Enter your submission link or text here..."
-                          value={submissionContent}
-                          onChange={(e) => setSubmissionContent(e.target.value)}
-                        />
-                        <button onClick={() => handleSubmission(assignment.id)} className="submit-btn">
-                          Confirm Submission
-                        </button>
-                        <button onClick={() => setSubmittingId(null)} className="cancel-btn">
-                          Cancel
-                        </button>
+                        <textarea placeholder="Enter submission..." value={submissionContent} onChange={(e) => setSubmissionContent(e.target.value)} />
+                        <button onClick={() => handleSubmission(assignment.id)} className="submit-btn">Confirm</button>
+                        <button onClick={() => setSubmittingId(null)} className="cancel-btn">Cancel</button>
                       </div>
                     ) : (
-                      <button onClick={() => setSubmittingId(assignment.id)} className="auth-button">
-                        Submit Work
-                      </button>
+                      <button onClick={() => setSubmittingId(assignment.id)} className="auth-button">Submit Work</button>
                     )}
                   </div>
                 </div>

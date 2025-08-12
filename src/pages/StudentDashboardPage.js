@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient';
 import './Dashboard.css';
 // چارٹ لائبریری سے ضروری چیزیں امپورٹ کریں
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels'; // نیا پلگ ان امپورٹ کریں
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Doughnut } from 'react-chartjs-2';
 
 // نئے پلگ ان کو رجسٹر کریں
@@ -22,7 +22,7 @@ function StudentDashboardPage() {
         const { data: profileData } = await supabase.from('profiles').select('group_id').eq('id', user.id).single();
 
         if (profileData && profileData.group_id) {
-          const { count: assignments } = await supabase.from('assignments').select('*', { count: 'exact', head: true }).eq('group_id', profileData.group_id);
+          const { count: assignments } = await supabase.from('assigned_tasks').select('*', { count: 'exact', head: true }).eq('group_id', profileData.group_id);
           setAssignmentCount(assignments || 0);
         }
 

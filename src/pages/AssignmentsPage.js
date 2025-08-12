@@ -4,17 +4,19 @@ import './Dashboard.css';
 
 function AssignmentsPage() {
   const [loading, setLoading] = useState(false);
-  const [allAssignments, setAllAssignments] = useState([]);
-  const [filteredAssignments, setFilteredAssignments] = useState([]);
+  const [assignments, setAssignments] = useState([]); // यह हमारा اسائنمنٹ بینک ہے
   const [groups, setGroups] = useState([]);
   const [user, setUser] = useState(null);
-  const [filter, setFilter] = useState('all');
 
   // فارم کے لیے اسٹیٹس
   const [name, setName] = useState('');
   const [details, setDetails] = useState('');
   const [file, setFile] = useState(null);
-  const [selectedGroup, setSelectedGroup] = useState('');
+  
+  // اسائنمنٹ بھیجنے کے لیے اسٹیٹس
+  const [assigningId, setAssigningId] = useState(null); // کس اسائنمنٹ کو بھیج رہے ہیں
+  const [groupToAssign, setGroupToAssign] = useState('');
+
   const [message, setMessage] = useState('');
 
   async function fetchData() {
@@ -25,9 +27,9 @@ function AssignmentsPage() {
       const { data: groupsData } = await supabase.from('groups').select('id, name').eq('teacher_id', user.id);
       setGroups(groupsData || []);
       
-      const { data: assignmentsData } = await supabase.from('assignments').select(`*, groups (name)`).eq('teacher_id', user.id).order('created_at', { ascending: false });
-      setAllAssignments(assignmentsData || []);
-      setFilteredAssignments(assignmentsData || []);
+      // اب ہم صرف اسائنمنٹ بینک لائیں گے
+      const { data: assignmentsData } = await supabase.from('assignments').select('*').eq('teacher_id', user.id).order('created_at', { ascending: false });
+      setAssignments(assignmentsData || []);
     }
   }
 
@@ -35,32 +37,11 @@ function AssignmentsPage() {
     fetchData();
   }, []);
 
-  // فلٹر کی منطق
-  useEffect(() => {
-    if (filter === 'all') {
-      setFilteredAssignments(allAssignments);
-    } else {
-      setFilteredAssignments(allAssignments.filter(a => a.group_id === parseInt(filter)));
-    }
-  }, [filter, allAssignments]);
-
-  const handleDeleteAssignment = async (assignmentId) => {
-    if (window.confirm("Are you sure?")) {
-      const { error } = await supabase.from('assignments').delete().eq('id', assignmentId);
-      if (error) alert(error.message);
-      else fetchData(); // ڈیٹا دوبارہ حاصل کریں
-    }
-  };
-
   const handleCreateAssignment = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-    if (!selectedGroup) {
-      setMessage('Please select a group.');
-      setLoading(false);
-      return;
-    }
+    
     let fileUrl = '';
     if (file) {
       const fileExt = file.name.split('.').pop();
@@ -76,58 +57,97 @@ function AssignmentsPage() {
       fileUrl = data.publicUrl;
     }
 
-    const { error } = await supabase.from('assignments').insert({ name, details, link_url: fileUrl, group_id: selectedGroup, teacher_id: user.id });
+    const { data: newAssignment, error } = await supabase
+      .from('assignments')
+      .insert({ name, details, link_url: fileUrl, teacher_id: user.id })
+      .select()
+      .single();
+
     if (error) {
       setMessage('Error creating assignment: ' + error.message);
     } else {
-      setMessage('Assignment created successfully!');
-      fetchData(); // ڈیٹا دوبارہ حاصل کریں
-      setName(''); setDetails(''); setFile(null); setSelectedGroup('');
+      setMessage('New assignment added to your bank!');
+      setAssignments([newAssignment, ...assignments]);
+      setName(''); setDetails(''); setFile(null);
       document.getElementById('assignmentFile').value = "";
       setTimeout(() => setMessage(''), 3000);
     }
     setLoading(false);
   };
+  
+  const handleDeleteAssignment = async (assignmentId) => {
+    if (window.confirm("Are you sure? This will only delete from the bank.")) {
+      const { error } = await supabase.from('assignments').delete().eq('id', assignmentId);
+      if (error) alert(error.message);
+      else setAssignments(assignments.filter(a => a.id !== assignmentId));
+    }
+  };
+
+  // اسائنمنٹ بھیجنے کا نیا فنکشن
+  const handleAssignTask = async (assignmentId) => {
+    if (!groupToAssign) {
+        alert("Please select a group to assign this task.");
+        return;
+    }
+    const { error } = await supabase
+      .from('assigned_tasks')
+      .insert({
+        assignment_id: assignmentId,
+        group_id: groupToAssign,
+        teacher_id: user.id
+      });
+    
+    if (error) {
+        alert("Error assigning task: " + error.message);
+    } else {
+        alert("Task assigned successfully to the selected group!");
+        setAssigningId(null);
+        setGroupToAssign('');
+    }
+  };
 
   return (
     <div className="dashboard-container">
-      <h2>Assignments</h2>
+      <h2>Assignment Bank</h2>
       
       <div className="form-container">
         <h3>Create a New Assignment</h3>
         <form className="add-student-form" onSubmit={handleCreateAssignment}>
           <input type="text" placeholder="Assignment Name" value={name} onChange={(e) => setName(e.target.value)} required />
-          <textarea placeholder="Details about the assignment" value={details} onChange={(e) => setDetails(e.target.value)} />
-          
+          <textarea placeholder="Details" value={details} onChange={(e) => setDetails(e.target.value)} />
           <label htmlFor="assignmentFile">Upload File (Optional)</label>
           <input id="assignmentFile" type="file" onChange={(e) => setFile(e.target.files[0])} />
-
-          <select value={selectedGroup} onChange={(e) => setSelectedGroup(e.target.value)} required>
-            <option value="">Select a Group</option>
-            {groups.map(group => (<option key={group.id} value={group.id}>{group.name}</option>))}
-          </select>
-          <button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Assignment'}</button>
+          <button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save to Bank'}</button>
         </form>
         {message && <p className="success-message">{message}</p>}
       </div>
 
       <div className="list-container">
-        <h3>
-          Created Assignments
-          <select value={filter} onChange={(e) => setFilter(e.target.value)} style={{float: 'right', padding: '5px'}}>
-            <option value="all">All Groups</option>
-            {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-          </select>
-        </h3>
+        <h3>Your Saved Assignments</h3>
         <table className="students-table">
-          <thead><tr><th>Name</th><th>Group</th><th>File</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Name</th><th>File</th><th>Actions</th></tr></thead>
           <tbody>
-            {filteredAssignments.map(assignment => (
+            {assignments.map(assignment => (
               <tr key={assignment.id}>
-                <td>{assignment.name}</td>
-                <td>{assignment.groups ? assignment.groups.name : 'N/A'}</td>
+                <td>
+                  {assignment.name}
+                  {/* اسائنمنٹ بھیجنے کا فارم */}
+                  {assigningId === assignment.id && (
+                    <div className="assign-form">
+                      <select value={groupToAssign} onChange={(e) => setGroupToAssign(e.target.value)}>
+                        <option value="">Select a group</option>
+                        {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                      </select>
+                      <button onClick={() => handleAssignTask(assignment.id)} className="submit-btn">Confirm</button>
+                      <button onClick={() => setAssigningId(null)} className="cancel-btn">Cancel</button>
+                    </div>
+                  )}
+                </td>
                 <td>{assignment.link_url ? (<a href={assignment.link_url} target="_blank" rel="noopener noreferrer">View File</a>) : ('No file')}</td>
-                <td><button onClick={() => handleDeleteAssignment(assignment.id)} className="delete-btn">Delete</button></td>
+                <td style={{display: 'flex', gap: '5px'}}>
+                  <button onClick={() => setAssigningId(assignment.id)} className="auth-button" style={{backgroundColor: '#17a2b8'}}>Assign</button>
+                  <button onClick={() => handleDeleteAssignment(assignment.id)} className="delete-btn">Delete</button>
+                </td>
               </tr>
             ))}
           </tbody>
