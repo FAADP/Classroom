@@ -13,14 +13,17 @@ function AuthForm() {
     event.preventDefault();
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.signInWithPassword({ email, password });
-      if (!user) throw new Error("Login failed.");
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
       
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-      if (profile.role === 'teacher') navigate('/teacher-dashboard');
-      else if (profile.role === 'student') navigate('/student-dashboard');
-      else throw new Error('No role found for this user.');
+      if (user) {
+        const { data: profile, error: profileError } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        if (profileError) throw profileError;
 
+        if (profile.role === 'teacher') navigate('/teacher-dashboard');
+        else if (profile.role === 'student') navigate('/student-dashboard');
+        else throw new Error('No role found for this user.');
+      }
     } catch (error) {
       alert(error.error_description || error.message);
     } finally {
@@ -33,6 +36,8 @@ function AuthForm() {
       <div className="cube">
         <div className="face front">
           <form className="auth-form" onSubmit={handleSubmit}>
+            {/* نیا ٹائٹل یہاں شامل کیا گیا ہے */}
+            <h1 className="form-title">Classroom App</h1> 
             <h2>Login</h2>
             <div className="input-group">
               <label htmlFor="email">Email</label>

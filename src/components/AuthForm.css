@@ -109,3 +109,14 @@
     /* animation: none; کو ہٹا دیا گیا ہے تاکہ کیوب گھومتا رہے */
   }
 }
+.form-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  color: #600000; /* گہرا میرون رنگ */
+  margin-bottom: 10px;
+}
+
+.auth-form h2 {
+  margin-top: 0; /* Login کی ہیڈنگ سے فاصلہ کم کرنے کے لیے */
+}
