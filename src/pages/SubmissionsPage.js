@@ -13,16 +13,25 @@ function SubmissionsPage() {
     async function fetchSubmissions() {
       const { data, error } = await supabase
         .from('submissions')
-        .select(`
-          id, created_at, submission_text, submission_file_url, grade, feedback, 
-          profiles ( full_name ), 
-          assignments ( name )
-        `);
+        .select(`id, created_at, submission_text, submission_file_url, grade, feedback, profiles(full_name), assignments(name)`);
       
       if (error) {
         console.error('Error fetching submissions:', error);
-      } else {
-        setSubmissions(data || []);
+      } else if (data) {
+        const submissionsWithUrls = await Promise.all(
+          data.map(async (submission) => {
+            if (submission.submission_file_url) {
+              const { data: urlData } = await supabase.storage
+                .from('submissions')
+                .createSignedUrl(submission.submission_file_url, 300);
+              if (urlData) {
+                submission.signedUrl = urlData.signedUrl;
+              }
+            }
+            return submission;
+          })
+        );
+        setSubmissions(submissionsWithUrls);
       }
       setLoading(false);
     }
@@ -40,7 +49,8 @@ function SubmissionsPage() {
     if (error) {
       alert("Error saving grade: " + error.message);
     } else {
-      setSubmissions(submissions.map(s => s.id === submissionId ? data : s));
+      const updatedSubmissions = submissions.map(s => s.id === submissionId ? { ...s, ...data, signedUrl: s.signedUrl } : s);
+      setSubmissions(updatedSubmissions);
       setGradingId(null);
       setGrade('');
       setFeedback('');
@@ -65,24 +75,23 @@ function SubmissionsPage() {
           <table className="students-table">
             <thead>
               <tr>
-                <th>Student Name</th>
-                <th>Assignment Name</th>
+                <th>Student</th>
+                <th>Assignment</th>
                 <th>Submission</th>
                 <th>Grade</th>
+                <th>Feedback</th> {/* نیا کالم */}
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {submissions.map(submission => (
                 <tr key={submission.id}>
-                  <td>{submission.profiles ? submission.profiles.full_name : 'N/A'}</td>
-                  <td>{submission.assignments ? submission.assignments.name : 'N/A'}</td>
+                  <td>{submission.profiles?.full_name || 'N/A'}</td>
+                  <td>{submission.assignments?.name || 'N/A'}</td>
                   <td>
                     {submission.submission_text && <p>{submission.submission_text}</p>}
-                    {/* --- یہاں تبدیلی کی گئی ہے --- */}
-                    {/* اب یہ براہ راست پبلک لنک استعمال کر رہا ہے */}
-                    {submission.submission_file_url && (
-                      <a href={submission.submission_file_url} target="_blank" rel="noopener noreferrer">
+                    {submission.signedUrl && (
+                      <a href={submission.signedUrl} target="_blank" rel="noopener noreferrer">
                         View Submitted File
                       </a>
                     )}
@@ -92,6 +101,14 @@ function SubmissionsPage() {
                       <input type="text" value={grade} onChange={(e) => setGrade(e.target.value)} placeholder="e.g., A+" />
                     ) : (
                       submission.grade || 'Not Graded'
+                    )}
+                  </td>
+                  <td>
+                    {/* --- کلیدی تبدیلی یہاں ہے --- */}
+                    {gradingId === submission.id ? (
+                      <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Feedback..."/>
+                    ) : (
+                      submission.feedback || '-'
                     )}
                   </td>
                   <td>
