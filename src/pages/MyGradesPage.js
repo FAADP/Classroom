@@ -9,24 +9,12 @@ function MyGradesPage() {
   useEffect(() => {
     async function fetchGrades() {
       const { data: { user } } = await supabase.auth.getUser();
-
       if (user) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('submissions')
-          .select(`
-            id,
-            submission_content,
-            grade,
-            feedback,
-            assignments ( name )
-          `)
+          .select(`id, submission_text, submission_file_url, grade, feedback, assignments ( name )`)
           .eq('student_id', user.id);
-        
-        if (error) {
-          console.error('Error fetching grades:', error);
-        } else {
-          setSubmissions(data);
-        }
+        setSubmissions(data || []);
       }
       setLoading(false);
     }
@@ -42,30 +30,26 @@ function MyGradesPage() {
       <div className="list-container">
         <h3>My Grades & Submissions</h3>
         <div className="content">
-          {submissions.length === 0 ? (
-            <p>You have not submitted any assignments yet.</p>
-          ) : (
-            <table className="students-table">
-              <thead>
-                <tr>
-                  <th>Assignment Name</th>
-                  <th>Your Submission</th>
-                  <th>Grade</th>
-                  <th>Feedback</th>
+          <table className="students-table">
+            <thead><tr><th>Assignment</th><th>Your Submission</th><th>Grade</th><th>Feedback</th></tr></thead>
+            <tbody>
+              {submissions.map(submission => (
+                <tr key={submission.id}>
+                  <td>{submission.assignments ? submission.assignments.name : 'Deleted'}</td>
+                  <td>
+                    {submission.submission_text && <p>{submission.submission_text}</p>}
+                    {submission.submission_file_url && (
+                      <a href={submission.submission_file_url} target="_blank" rel="noopener noreferrer">
+                        View Submitted File
+                      </a>
+                    )}
+                  </td>
+                  <td>{submission.grade || 'Not Graded'}</td>
+                  <td>{submission.feedback || '-'}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {submissions.map(submission => (
-                  <tr key={submission.id}>
-                    <td>{submission.assignments ? submission.assignments.name : 'N/A'}</td>
-                    <td>{submission.submission_content}</td>
-                    <td>{submission.grade || 'Not Graded Yet'}</td>
-                    <td>{submission.feedback || '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -5,47 +5,43 @@ import './Dashboard.css';
 function SubmissionsPage() {
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState([]);
-
-  // گریڈنگ کے لیے نئی اسٹیٹس
   const [gradingId, setGradingId] = useState(null);
   const [grade, setGrade] = useState('');
   const [feedback, setFeedback] = useState('');
 
-  async function fetchSubmissions() {
-    const { data, error } = await supabase
-      .from('submissions')
-      .select(`
-        id, created_at, submission_content, grade, feedback,
-        profiles ( full_name ),
-        assignments ( name )
-      `);
-    
-    if (error) {
-      console.error('Error fetching submissions:', error);
-    } else {
-      setSubmissions(data);
-    }
-    setLoading(false);
-  }
-
   useEffect(() => {
+    async function fetchSubmissions() {
+      const { data, error } = await supabase
+        .from('submissions')
+        .select(`
+          id, created_at, submission_text, submission_file_url, grade, feedback, 
+          profiles ( full_name ), 
+          assignments ( name )
+        `);
+      
+      if (error) {
+        console.error('Error fetching submissions:', error);
+      } else {
+        setSubmissions(data || []);
+      }
+      setLoading(false);
+    }
     fetchSubmissions();
   }, []);
 
   const handleGradeSubmission = async (submissionId) => {
     const { data, error } = await supabase
       .from('submissions')
-      .update({ grade: grade, feedback: feedback })
+      .update({ grade, feedback })
       .eq('id', submissionId)
-      .select()
+      .select(`*, profiles(full_name), assignments(name)`)
       .single();
 
     if (error) {
       alert("Error saving grade: " + error.message);
     } else {
-      // UI کو اپڈیٹ کریں
       setSubmissions(submissions.map(s => s.id === submissionId ? data : s));
-      setGradingId(null); // فارم بند کر دیں
+      setGradingId(null);
       setGrade('');
       setFeedback('');
     }
@@ -63,12 +59,9 @@ function SubmissionsPage() {
 
   return (
     <div className="dashboard-container">
-      <h2>Submissions</h2>
       <div className="list-container">
         <h3>All Submitted Assignments</h3>
-        {submissions.length === 0 ? (
-          <p>No assignments have been submitted yet.</p>
-        ) : (
+        <div className="content">
           <table className="students-table">
             <thead>
               <tr>
@@ -84,14 +77,19 @@ function SubmissionsPage() {
                 <tr key={submission.id}>
                   <td>{submission.profiles ? submission.profiles.full_name : 'N/A'}</td>
                   <td>{submission.assignments ? submission.assignments.name : 'N/A'}</td>
-                  <td>{submission.submission_content}</td>
+                  <td>
+                    {submission.submission_text && <p>{submission.submission_text}</p>}
+                    {/* --- یہاں تبدیلی کی گئی ہے --- */}
+                    {/* اب یہ براہ راست پبلک لنک استعمال کر رہا ہے */}
+                    {submission.submission_file_url && (
+                      <a href={submission.submission_file_url} target="_blank" rel="noopener noreferrer">
+                        View Submitted File
+                      </a>
+                    )}
+                  </td>
                   <td>
                     {gradingId === submission.id ? (
-                      // گریڈنگ فارم
-                      <div className="grading-form">
-                        <input type="text" value={grade} onChange={(e) => setGrade(e.target.value)} placeholder="e.g., A+" />
-                        <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Feedback..." />
-                      </div>
+                      <input type="text" value={grade} onChange={(e) => setGrade(e.target.value)} placeholder="e.g., A+" />
                     ) : (
                       submission.grade || 'Not Graded'
                     )}
@@ -103,14 +101,14 @@ function SubmissionsPage() {
                         <button onClick={() => setGradingId(null)} className="cancel-btn">Cancel</button>
                       </div>
                     ) : (
-                      <button onClick={() => startGrading(submission)} className="auth-button">View & Grade</button>
+                      <button onClick={() => startGrading(submission)} className="auth-button">Grade</button>
                     )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
+        </div>
       </div>
     </div>
   );
